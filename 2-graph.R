@@ -51,6 +51,7 @@ ggsurvplot(
   risk.table.col = "strata",# Risk table color by groups
   risk.table.height = 0.25, # Useful to change when you have multiple groups
   xlim = c(0, 5),
+  break.x.by = 1,
   ggtheme = theme_bw()      # Change ggplot2 theme
 )
 dev.off()
@@ -71,6 +72,7 @@ ggsurvplot(
   risk.table.col = "strata",# Risk table color by groups
   risk.table.height = 0.25, # Useful to change when you have multiple groups
   xlim = c(0, 5),
+  break.x.by = 1,
   ggtheme = theme_bw()      # Change ggplot2 theme
 )
 dev.off()
@@ -90,6 +92,7 @@ ggsurvplot(
   risk.table.col = "strata",# Risk table color by groups
   risk.table.height = 0.25, # Useful to change when you have multiple groups
   xlim = c(0, 5),
+  break.x.by = 1,
   ggtheme = theme_bw()      # Change ggplot2 theme
 )
 dev.off()
@@ -107,6 +110,7 @@ ggsurvplot_facet(
   pval = TRUE,              # Add p-value
   palette = "jco",
   xlim = c(0, 5),
+  break.x.by = 1,
   ggtheme = theme_bw()      # Change ggplot2 theme
 )
 dev.off()
@@ -124,6 +128,7 @@ ggsurvplot_facet(
   pval = TRUE,              # Add p-value
   palette = "jco",
   xlim = c(0, 5),
+  break.x.by = 1,
   ggtheme = theme_bw()      # Change ggplot2 theme
 )
 dev.off()
