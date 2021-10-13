@@ -3,12 +3,13 @@ library(glmnet)
 library(PRROC)
 
 dat <- read.csv("fields.tsv", sep = "\t", header=F)
+#dat <- dat[,sample(ncol(dat))]
 trainDataIndex <- sample(1:nrow(dat), 0.7*nrow(dat))
 trainData <- dat[trainDataIndex, ]
 testData <- dat[-trainDataIndex, ]
 
-x = model.matrix(V55 ~.,data=trainData)
-cvfit = cv.glmnet(x, y=as.factor(trainData$V55), alpha=0.0, family="binomial",type.measure = "class")
+x = model.matrix(V57 ~.,data=trainData)
+cvfit = cv.glmnet(x, y=as.factor(trainData$V57), alpha=0.0, family="binomial",type.measure = "class")
 
 pdf("glm.pdf")
 plot(cvfit)
@@ -19,12 +20,12 @@ params <- coef(cvfit,s=lambda_1se)
 params <- as.data.frame(summary(params))
 write.csv(params, "coef.csv")
 
-x_test <- model.matrix(V55~.,data = testData)
+x_test <- model.matrix(V57~.,data = testData)
 
 lasso_prob <- predict(cvfit,newx = x_test,s=lambda_1se,type="response")
 
-grp0 <- lasso_prob[testData$V55 == 0,]
-grp1 <- lasso_prob[testData$V55 == 1,]
+grp0 <- lasso_prob[testData$V57 == 0,]
+grp1 <- lasso_prob[testData$V57 == 1,]
 print(mean(grp0))
 print(mean(grp1))
 roc<-roc.curve(scores.class0 = grp1, scores.class1 = grp0, curve=T)
@@ -43,7 +44,7 @@ print(roc)
 print(pr)
 quit()
 
-pred <- prediction(lasso_prob, testData$V55)
+pred <- prediction(lasso_prob, testData$V57)
 perf <- performance(pred,"tpr","fpr")
 print(performance(pred,"auc")) # shows calculated AUC for model
 pdf("glm.auc.pdf")
@@ -53,6 +54,6 @@ dev.off()
 
 lasso_predict <- rep("0",nrow(testData))
 lasso_predict[lasso_prob>.5] <- "1"
-table(pred=lasso_predict,true=testData$V55)
+table(pred=lasso_predict,true=testData$V57)
 
-mean(lasso_predict==testData$V55)
+mean(lasso_predict==testData$V57)

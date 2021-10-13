@@ -63,7 +63,7 @@ with open("fields.tsv", "w") as fout2:
                 out = (ptid, eye, gender, year, startmd, firstage, event, time)
                 fout.write("%s\n" % "\t".join(map(str,out)))
                 if time >= 5.0:
-                    fout2.write("%s\t0\n" % "\t".join(map(str, ld)))
+                    fout2.write("%f\t%f\t%s\t0\n" % (firstage, np.mean(ld), "\t".join(map(str, ld))))
                 elif event == 1:
-                    fout2.write("%s\t1\n" % "\t".join(map(str, ld)))
+                    fout2.write("%f\t%f\t%s\t1\n" % (firstage, np.mean(ld), "\t".join(map(str, ld))))
     print(found)
