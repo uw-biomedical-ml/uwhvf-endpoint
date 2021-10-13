@@ -6,17 +6,18 @@ dat <- read.csv("fields.tsv", sep = "\t", header=F)
 trainDataIndex <- sample(1:nrow(dat), 0.7*nrow(dat))
 trainData <- dat[trainDataIndex, ]
 testData <- dat[-trainDataIndex, ]
-summary(dat)
 
 x = model.matrix(V55 ~.,data=trainData)
-cvfit = cv.glmnet(x, y=as.factor(trainData$V55), alpha=1, family="binomial",type.measure = "class")
+cvfit = cv.glmnet(x, y=as.factor(trainData$V55), alpha=0.0, family="binomial",type.measure = "class")
 
 pdf("glm.pdf")
 plot(cvfit)
 dev.off()
 
 lambda_1se <- cvfit$lambda.1se
-#print(coef(cvfit,s=lambda_1se))
+params <- coef(cvfit,s=lambda_1se)
+params <- as.data.frame(summary(params))
+write.csv(params, "coef.csv")
 
 x_test <- model.matrix(V55~.,data = testData)
 
