@@ -24,10 +24,9 @@ dat$startmdcat[dat$startmd > -2.5] <- "> -2.5"
 dat$startmdcat[dat$startmd > -5.0 & dat$startmd <= -2.5] <- "-5 to -2.5"
 dat$startmdcat[dat$startmd > -10.0 & dat$startmd <= -5] <- "-10 to -5"
 dat$startmdcat[dat$startmd > -15.0 & dat$startmd <= -10] <- "-15 to -10"
-dat$startmdcat[dat$startmd > -20.0 & dat$startmd <= -15] <- "-20 to -15"
-dat$startmdcat[dat$startmd < -20.0] <- "< -20"
+dat$startmdcat[dat$startmd <= -15] <- "< -15"
 
-dat$startmdcat <- factor(dat$startmdcat, levels=c("> -2.5", "-5 to -2.5", "-10 to -5", "-15 to -10", "-20 to -15", "< -20"))
+dat$startmdcat <- factor(dat$startmdcat, levels=c("> -2.5", "-5 to -2.5", "-10 to -5", "-15 to -10", "< -15"))
 
 dat$yearcat <- NULL
 dat$yearcat[dat$year < 2005] <- "< 2005"
@@ -51,15 +50,16 @@ ggsurvplot(
   risk.table = TRUE,        # Add risk table
   risk.table.col = "strata",# Risk table color by groups
   risk.table.height = 0.25, # Useful to change when you have multiple groups
-  xlim = c(0, 15),
+  xlim = c(0, 5),
   ggtheme = theme_bw()      # Change ggplot2 theme
 )
 dev.off()
 
 
+dat$Age <- dat$agecat
 
 pdf("agecat.pdf")
-fit <- survfit(Surv(time, event) ~ agecat, data = dat)
+fit <- survfit(Surv(time, event) ~ Age, data = dat)
 ggsurvplot(
   fit, 
   data = dat, 
@@ -70,14 +70,15 @@ ggsurvplot(
   risk.table = TRUE,        # Add risk table
   risk.table.col = "strata",# Risk table color by groups
   risk.table.height = 0.25, # Useful to change when you have multiple groups
-  xlim = c(0, 15),
+  xlim = c(0, 5),
   ggtheme = theme_bw()      # Change ggplot2 theme
 )
 dev.off()
 
+dat$MD <- dat$startmdcat
 
 pdf("mdcat.pdf")
-fit <- survfit(Surv(time, event) ~ startmdcat, data = dat)
+fit <- survfit(Surv(time, event) ~ MD, data = dat)
 ggsurvplot(
   fit, 
   data = dat, 
@@ -88,7 +89,7 @@ ggsurvplot(
   risk.table = TRUE,        # Add risk table
   risk.table.col = "strata",# Risk table color by groups
   risk.table.height = 0.25, # Useful to change when you have multiple groups
-  xlim = c(0, 15),
+  xlim = c(0, 5),
   ggtheme = theme_bw()      # Change ggplot2 theme
 )
 dev.off()
@@ -96,32 +97,33 @@ dev.off()
 
 
 pdf("facet.pdf")
-fit <- survfit(Surv(time, event) ~ startmdcat, data = dat)
+fit <- survfit(Surv(time, event) ~ MD, data = dat)
 ggsurvplot_facet(
   fit, 
   data = dat, 
-  facet.by = "agecat",
+  facet.by = "Age",
   size = 1,                 # change line size
   conf.int = TRUE,          # Add confidence interval
   pval = TRUE,              # Add p-value
   palette = "jco",
-  xlim = c(0, 15),
+  xlim = c(0, 5),
   ggtheme = theme_bw()      # Change ggplot2 theme
 )
 dev.off()
 
+dat$Year <- dat$yearcat
 
 pdf("facet-year.pdf")
-fit <- survfit(Surv(time, event) ~ yearcat, data = dat)
+fit <- survfit(Surv(time, event) ~ Year, data = dat)
 ggsurvplot_facet(
   fit, 
   data = dat, 
-  facet.by = "startmdcat",
+  facet.by = "MD",
   size = 1,                 # change line size
   conf.int = TRUE,          # Add confidence interval
   pval = TRUE,              # Add p-value
   palette = "jco",
-  xlim = c(0, 15),
+  xlim = c(0, 5),
   ggtheme = theme_bw()      # Change ggplot2 theme
 )
 dev.off()

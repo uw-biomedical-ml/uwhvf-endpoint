@@ -45,13 +45,10 @@ with open("ptlvl.tsv", "w") as fout:
                 if d == 0.0:
                     continue
                 diff = seq[d] - ld
-                #print(diff)
                 curdiff = (diff <= -7.0 ).astype(np.uint8)
                 accum = last + curdiff
-                #print(accum)
                 db7 = np.sum(accum == 2)
                 last = curdiff
-                #print(d, db7)
                 if db7 >= 5:
                     event = 1
                     time = d
