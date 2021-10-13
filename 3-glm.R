@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 library(glmnet)
 library(PRROC)
+set.seed(137)
 
 dat <- read.csv("fields.tsv", sep = "\t", header=F)
 #dat <- dat[,sample(ncol(dat))]
@@ -22,10 +23,13 @@ write.csv(params, "coef.csv")
 
 x_test <- model.matrix(V57~.,data = testData)
 
-lasso_prob <- predict(cvfit,newx = x_test,s=lambda_1se,type="response")
+outdf <- data.frame(prob = predict(cvfit,newx = x_test,s=lambda_1se,type="response"), truth = testData$V57)
+print(head(outdf))
+write.csv(outdf, "bootstrap-roc-prc/model.csv", row.names=F)
 
-grp0 <- lasso_prob[testData$V57 == 0,]
-grp1 <- lasso_prob[testData$V57 == 1,]
+
+grp0 <- outdf$s1[outdf$truth == 0]
+grp1 <- outdf$s1[outdf$truth == 1]
 print(mean(grp0))
 print(mean(grp1))
 roc<-roc.curve(scores.class0 = grp1, scores.class1 = grp0, curve=T)
