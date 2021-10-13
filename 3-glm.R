@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 library(glmnet)
-library(ROCR)
+library(PRROC)
 
 dat <- read.csv("fields.tsv", sep = "\t", header=F)
 trainDataIndex <- sample(1:nrow(dat), 0.7*nrow(dat))
@@ -21,10 +21,31 @@ lambda_1se <- cvfit$lambda.1se
 x_test <- model.matrix(V55~.,data = testData)
 
 lasso_prob <- predict(cvfit,newx = x_test,s=lambda_1se,type="response")
+
+grp0 <- lasso_prob[testData$V55 == 0,]
+grp1 <- lasso_prob[testData$V55 == 1,]
+print(mean(grp0))
+print(mean(grp1))
+roc<-roc.curve(scores.class0 = grp1, scores.class1 = grp0, curve=T)
+pr<-pr.curve(scores.class0 = grp1, scores.class1 = grp0, curve=T)
+
+pdf("glm.auc.pdf")
+plot(roc)
+dev.off()
+
+
+pdf("glm.pr.pdf")
+plot(pr)
+dev.off()
+
+print(roc)
+print(pr)
+quit()
+
 pred <- prediction(lasso_prob, testData$V55)
 perf <- performance(pred,"tpr","fpr")
+print(performance(pred,"auc")) # shows calculated AUC for model
 pdf("glm.auc.pdf")
-performance(pred,"auc") # shows calculated AUC for model
 plot(perf, col=rainbow(10))
 dev.off()
 
