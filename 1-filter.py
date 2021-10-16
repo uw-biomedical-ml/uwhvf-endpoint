@@ -14,12 +14,23 @@ with open("alldata.json") as fin:
 alldata = alldata["data"]
 
 found = [0,0]
+ptgrps = {}
+import random
 
 with open("fields.tsv", "w") as fout2:
+    header = []
+    for i in range(1,55):
+        header.append(f"p{i}")
+    header += ["age", "eye", "gender", "status", "grp", "foldid", "time"]
+    fout2.write("%s\n" % "\t".join(header))
     with open("ptlvl.tsv", "w") as fout:
         fout.write("ptid\teye\tgender\tyear\tstartmd\tage\tevent\ttime\n")
         for ptid in tqdm(alldata.keys()):
             ld = None
+            grp = "train"
+            if random.random() < 0.3:
+                grp = "test"
+            foldid = random.randint(1,10)
             seq = {}
             gender = alldata[ptid]["gender"]
             year = alldata[ptid]["year"]
@@ -62,8 +73,14 @@ with open("fields.tsv", "w") as fout2:
                     found[event] += 1
                 out = (ptid, eye, gender, year, startmd, firstage, event, time)
                 fout.write("%s\n" % "\t".join(map(str,out)))
-                if time >= 5.0:
-                    fout2.write("%f\t%f\t%s\t0\n" % (firstage, np.mean(ld), "\t".join(map(str, ld))))
-                elif event == 1:
-                    fout2.write("%f\t%f\t%s\t1\n" % (firstage, np.mean(ld), "\t".join(map(str, ld))))
+                eyebin = 0
+                if eye == "L":
+                    eyebin = 1
+                genderbin = 2
+                if gender == "M":
+                    genderbin = 0
+                if gender == "F":
+                    genderbin = 1
+
+                fout2.write("%s\t%f\t%d\t%d\t%d\t%s\t%d\t%f\n" % ("\t".join(map(str, ld)), firstage, eyebin, genderbin, event, grp,foldid, time))
     print(found)
