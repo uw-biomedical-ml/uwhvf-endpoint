@@ -57,13 +57,9 @@ params <- coef(cvfit,s=lambda_min)
 params <- as.data.frame(summary(params))
 write.csv(params, "coef.csv")
 
-x_test <- model.matrix(V56~.,data = testData)
-testTruth <- testData$V56
-print(nrow(testData))
-print(nrow(testData))
-print(testTruth)
+x_test <- model.matrix(~.,data = testData)
 
-outdf <- data.frame(prob = predict(cvfit,newx = x_test,s=lambda_min,type="response"), truth = testTruth)
+outdf <- data.frame(prob = predict(cvfit,newx = x_test,s=lambda_min,type="response"), status = testy$status, time = testy$time)
 print(head(outdf))
 write.csv(outdf, "bootstrap-roc-prc/model.csv", row.names=F)
 
