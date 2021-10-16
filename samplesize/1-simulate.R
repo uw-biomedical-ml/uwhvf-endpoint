@@ -5,7 +5,7 @@ library(doMC)
 registerDoMC(cores = 20)
 
 dat <- read.csv("../ptlvl.tsv", sep="\t")
-sdat <- dat[which(dat$age >= 60 & dat$age < 80 & dat$startmd <= -5.0),]
+sdat <- dat[which(dat$age >= 60 & dat$age < 80 & dat$startmd <= -5.0 & dat$grp == "test"),]
 summary(sdat)
 
 

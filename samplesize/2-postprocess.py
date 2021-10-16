@@ -26,3 +26,5 @@ with open("power.csv", "w") as fout:
         power = round(100.0 * buckets[key][0] / buckets[key][1], 2)
         fout.write("%s,%0.2f,%d\n" % (key, power, buckets[key][1]))
 
+
+

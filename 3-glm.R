@@ -24,29 +24,28 @@ testData <- subset(testData, select = -c(status,grp,foldid,time) )
 
 x = model.matrix(~.,data=trainData)
 
-#df = NULL
-#for (alpha in seq(0,1,length=100)^3) {
-    #error <- NULL
-    #for (rep in seq(0,1)) {
-        #cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=alpha, foldid = foldseq, parallel = T, relax=T, family="cox", type.measure = "C")
-        #error <- c(error, cvfit$cvm)
-    #}
-    #error <- mean(error)
-    #df <- rbind(df, data.frame(alpha=alpha, error=error))
-    #print(c(alpha,error))
-#}
-#print(df)
-#p <- ggplot(df, aes(alpha, error)) + geom_line() + geom_point()
-#ggsave("glmnet.alpha.pdf", p)
-#df <- df[order(-df$error),]
-#finalalpha <- df[1,]$alpha
+# grid search over alpha with fixed 10-CV folds precalculated to be pt-level splits
+df = NULL
+for (alpha in seq(0,1,length=100)^3) {
+    error <- NULL
+    for (rep in seq(0,1)) {
+        cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=alpha, foldid = foldseq, parallel = T, relax=T, family="cox", type.measure = "C")
+        error <- c(error, cvfit$cvm)
+    }
+    error <- mean(error)
+    df <- rbind(df, data.frame(alpha=alpha, error=error))
+    print(c(alpha,error))
+}
+print(df)
+p <- ggplot(df, aes(alpha, error)) + geom_line() + geom_point()
+ggsave("glmnet.alpha.pdf", p)
+df <- df[order(-df$error),]
+finalalpha <- df[1,]$alpha
 
-
-# TODO: Comment later
-finalalpha <- 0.0007513148
 print(finalalpha)
 
 cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=finalalpha, foldid = foldseq, parallel = T, relax=T, family="cox", type.measure = "C")
+save(cvfit, "finalmodel.Robj")
 
 pdf("glm.pdf")
 plot(cvfit)

@@ -3,11 +3,9 @@
 import json
 from tqdm import tqdm
 import numpy as np
+import random
 
-
-def calcMD(hvf, td):
-    md = np.mean(td)
-    return md
+random.seed(137)
 
 with open("alldata.json") as fin:
     alldata = json.load(fin)
@@ -15,20 +13,19 @@ alldata = alldata["data"]
 
 found = [0,0]
 ptgrps = {}
-import random
 
 with open("fields.tsv", "w") as fout2:
     header = []
     for i in range(1,55):
         header.append(f"p{i}")
-    header += ["age", "eye", "gender", "status", "grp", "foldid", "time"]
+    header += ["age", "eye", "gender", "status", "grp", "foldid", "time", "startmd"]
     fout2.write("%s\n" % "\t".join(header))
     with open("ptlvl.tsv", "w") as fout:
-        fout.write("ptid\teye\tgender\tyear\tstartmd\tage\tevent\ttime\n")
+        fout.write("ptid\teye\tgender\tyear\tstartmd\tage\tevent\ttime\tgrp\n")
         for ptid in tqdm(alldata.keys()):
             ld = None
             grp = "train"
-            if random.random() < 0.3:
+            if random.random() < 0.5:
                 grp = "test"
             foldid = random.randint(1,10)
             seq = {}
@@ -71,7 +68,7 @@ with open("fields.tsv", "w") as fout2:
                     continue
                 if time >= 5.0:
                     found[event] += 1
-                out = (ptid, eye, gender, year, startmd, firstage, event, time)
+                out = (ptid, eye, gender, year, startmd, firstage, event, time, grp)
                 fout.write("%s\n" % "\t".join(map(str,out)))
                 eyebin = 0
                 if eye == "L":
@@ -82,5 +79,5 @@ with open("fields.tsv", "w") as fout2:
                 if gender == "F":
                     genderbin = 1
 
-                fout2.write("%s\t%f\t%d\t%d\t%d\t%s\t%d\t%f\n" % ("\t".join(map(str, ld)), firstage, eyebin, genderbin, event, grp,foldid, time))
+                fout2.write("%s\t%f\t%d\t%d\t%d\t%s\t%d\t%f\t%f\n" % ("\t".join(map(str, ld)), firstage, eyebin, genderbin, event, grp,foldid, time, startmd))
     print(found)
