@@ -3,7 +3,8 @@
 library(ggplot2)
 
 dat <- read.csv("power.csv")
-p <- ggplot(dat, aes(hazard.ratio, power, color=simn)) + geom_point() + facet_grid(sample.size ~ length)
+sdat <- dat[which(dat$simn > 100),]
+p <- ggplot(sdat, aes(hazard.ratio, power, color=log(simn))) + geom_point() + facet_grid(sample.size ~ length)
 
 ggsave("power.png", p, width=12, height=6)
 
