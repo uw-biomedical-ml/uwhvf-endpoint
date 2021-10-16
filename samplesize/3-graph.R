@@ -29,7 +29,7 @@ for (hr in sort(unique(sdat$hazard.ratio))) {
 }
 print(pow80)
 
-p <- ggplot(pow80, aes(hazard.ratio, sample.size, color=length, group=length)) + geom_line() + geom_point()
+p <- ggplot(pow80, aes(hazard.ratio, sample.size, color=length, group=length)) + geom_point() + geom_smooth()
 ggsave("pow80.png", p)
 
 quit()
