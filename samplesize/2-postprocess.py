@@ -11,6 +11,8 @@ with open("simultation.csv") as fin:
         (ss, hr, yr, p) = arr
         p = float(p)
         hr = round(float(arr[1]),2)
+        if hr == 0.0 or hr == 1.0:
+            continue
         key = ",".join(map(str, (ss,yr,hr)))
         if not key in buckets:
             buckets[key] = [0, 0]
