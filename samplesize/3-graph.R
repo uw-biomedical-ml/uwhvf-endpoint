@@ -18,7 +18,8 @@ for (hr in sort(unique(sdat$hazard.ratio))) {
         if (max(tdat$power) <= 80.0 | min(tdat$power) >= 80) {
             next
         }
-        inter <- spline(tdat$power, tdat$sample.size, xmin=10, xmax=90, xout=seq(10,90,10))
+        #inter <- spline(tdat$power, tdat$sample.size, xmin=10, xmax=90, xout=seq(10,90,10))
+        inter <- approx(tdat$power, tdat$sample.size, xout=seq(10,90,10))
         if (inter$y[8] < 0) {
             print(inter)
         } else {
