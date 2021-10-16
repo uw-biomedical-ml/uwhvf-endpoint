@@ -28,6 +28,7 @@ for (hr in sort(unique(sdat$hazard.ratio))) {
     }
 }
 print(pow80)
+pow80 <- pow80[which(pow80$length > 2.0),]
 
 pow80$length <- factor(pow80$length)
 p <- ggplot(pow80, aes(hazard.ratio, sample.size, color=length, group=length)) + geom_point() + geom_smooth() + scale_color_brewer(palette="Set1")
