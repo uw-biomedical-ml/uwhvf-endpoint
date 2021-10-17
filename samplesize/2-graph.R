@@ -4,9 +4,10 @@ library(ggplot2)
 
 pow80 <- read.csv("simulation.csv")
 
+pow80$dummy <- paste(pow80$Years, pow80$setting)
 pow80$effect.size <- 100.0 * pow80$effect.size
 pow80$Years <- factor(pow80$length)
-p <- ggplot(pow80, aes(effect.size, sample.size, color=Years, group=Years)) + geom_point() + geom_smooth() + scale_color_brewer(palette="Set1") + scale_y_log10() + xlab("Effect size as percent reduction in event rate") + ylab("Number of patients needed in each arm")
+p <- ggplot(pow80, aes(effect.size, sample.size, color=Years, group=dummy, linetype=setting)) + geom_point() + geom_smooth() + scale_color_brewer(palette="Set1") + scale_y_log10() + xlab("Effect size as percent reduction in event rate") + ylab("Number of patients needed in each arm")
 ggsave("pow80.png", p)
 
 quit()
