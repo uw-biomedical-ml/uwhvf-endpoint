@@ -20,7 +20,7 @@ for (setting in c("base", "subgroup")) {
     for (i in seq(length(eventrates$time))) {
         yr <- eventrates$time[i]
         prob <- 1 - eventrates$surv[i]
-        for (effectsize in seq(0.10, 0.60, 0.05)) {
+        for (effectsize in seq(0.10, 0.30, 0.01)) {
             prob2 <- (1 - effectsize) * prob
             h <- 2*asin(sqrt(prob)) - 2*asin(sqrt(prob2)) 
             pwr <- pwr.2p.test(h = h, sig.level=0.05, power=0.8)
