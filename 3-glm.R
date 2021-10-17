@@ -26,7 +26,7 @@ x = model.matrix(~.,data=trainData)
 
 # grid search over alpha with fixed 10-CV folds precalculated to be pt-level splits
 df = NULL
-for (alpha in seq(0,1,length=100)^3) {
+for (alpha in seq(0,1,length=100)^4) {
     error <- NULL
     for (rep in seq(0,1)) {
         cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=alpha, foldid = foldseq, parallel = T, relax=T, family="cox", type.measure = "C")

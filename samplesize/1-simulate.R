@@ -5,49 +5,42 @@ library(doMC)
 registerDoMC(cores = 20)
 
 dat <- read.csv("../ptlvl.tsv", sep="\t")
-sdat <- dat[which(dat$age >= 60 & dat$age < 80 & dat$startmd <= -5.0 & dat$grp == "test"),]
-summary(sdat)
+sdat <- dat[which(dat$age >= 60 & dat$age < 80 & dat$startmd <= -5.0),]
 
+mod <- survfit(Surv(time, event) ~ 1, data=sdat)
+eventrates <- summary(mod, times = c(1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5))
 
-df <- NULL
-for (ss in seq(50,1000,50)) {
-    print(ss)
-    for (yr in seq(1.0,5,0.5)) {
-        print(yr)
-        ysdat <- data.frame(sdat)
-        ysdat$event[ysdat$time >= yr] <- 0
-        ysdat$time[ysdat$time >= yr] <- yr
-        res <- foreach (rep=1:100000, .combine=rbind) %dopar% {
-        #for (rep in seq(10000)) {
-            n1 <- ysdat[sample(nrow(ysdat),ss,replace=TRUE),]
-            n2 <- ysdat[sample(nrow(ysdat),ss,replace=TRUE),]
-            n3 <- data.frame(n2)
-            indx <- which(n3$event == 1)
-            if (length(indx) > 1) {
-                flipindx <- sample(indx, sample(1:length(indx),1), replace=F)
-                n3$event[flipindx] <- 0
+print(eventrates)
+print(names(eventrates))
+print(eventrates$time)
+print(eventrates$surv)
+
+allres <- NULL
+for (i in seq(length(eventrates$time))) {
+    yr <- eventrates$time[i]
+    prob <- 1 - eventrates$surv[i]
+    for (effectsize in seq(0.10, 0.60, 0.05)) {
+        ls = 50
+        rs = 200000
+        ss = 2000
+        prob2 <- (1 - effectsize) * prob
+        while (T) {
+            print(c(yr, ss, effectsize))
+            res <- foreach (rep=1:1000, .combine=rbind) %dopar% {
+                control <- sum(runif(ss,0,1) < prob)
+                exp <- sum(runif(ss,0,1) < prob2)
+                ft <- fisher.test(matrix(c(control, ss - control, exp, ss - exp), nrow=2))
+                ft$p.value
             }
-
-            # measure hr effect of flip
-            n1$g <- "Control"
-            n2$g <- "Control"
-            n3$g <- "Exp"
-            full <- rbind(n2, n3)
-            full$g <- factor(full$g, levels=c("Control", "Exp"))
-            mod <- coxph(Surv(time,event) ~ g, full)
-            hr <- exp(mod$coefficients)[[1]]
-
-            full <- rbind(n1,n3)
-            full$g <- factor(full$g, levels=c("Control", "Exp"))
-            mod <- coxph(Surv(time,event) ~ g, full)
-            p <- summary(mod)$coefficients[, 5]
-            #df <- rbind(df, data.frame(sample.size=ss, effect.size=hr, length=yr, p=p))
-            if (is.na(p)) { p <- 1.0 }
-            if (is.na(hr)) { hr <- 1.0 }
-            data.frame(sample.size=ss, effect.size=hr, length=yr, p=p)
+            power <- 100.0 * sum(res < 0.05) / nrow(res)
+            print(power)
+            if (power >= 79.9 & power <= 80.1) { break }
+            if (ls == rs) { break }
+            if (power > 80.1) { rs = ss }
+            if (power < 79.9) { ls = ss }
+            ss = as.integer((ls + rs) / 2.0)
         }
-        df <- rbind(df, res)
+        allres <- rbind(allres, data.frame(length=yr, control.event = prob, drug.event = prob2, sample.size = ss, effect.size=effectsize))
     }
 }
-
-write.csv(df, "simultation.csv", row.names=F)
+write.csv(allres, "simulation.csv", row.names=F)
