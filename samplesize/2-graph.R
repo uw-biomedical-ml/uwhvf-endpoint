@@ -4,10 +4,16 @@ library(ggplot2)
 
 pow80 <- read.csv("simulation.csv")
 
+pow80$setting <- factor(pow80$setting, levels=c("base", "subgroup", "model"), labels=c("No selection", "Traditional Subgroup", "AI Model"))
 pow80$effect.size <- 100.0 * pow80$effect.size
 pow80 <- pow80[which(pow80$effect.size <= 30),]
 pow80$Years <- factor(pow80$length)
-p <- ggplot(pow80, aes(effect.size, sample.size, color=setting, group=setting)) + geom_point() + geom_line() + scale_color_brewer(palette="Set1") + xlab("Effect size as percent reduction in event rate") + ylab("Number of patients needed in each arm") + facet_wrap(Years~., scales="free_y") + scale_y_log10(breaks=c(300, 500, 1000, 2000, 5000, 10000, 20000, 40000, 80000, 160000))
+p <- ggplot(pow80, aes(effect.size, sample.size, color=setting, group=setting)) + geom_point() + geom_line() + 
+    scale_color_brewer(palette="Set1") + xlab("Effect size as percent reduction in event rate") + 
+    ylab("Number of patients needed in each arm") + 
+    scale_y_log10(breaks=c(300, 500, 1000, 2000, 5000, 10000, 20000, 40000, 80000, 160000)) + 
+    theme(legend.title = element_blank()) +
+    facet_wrap(Years~., scales="free_y") 
 ggsave("pow80.png", p, width=12, height=6)
 
 quit()
