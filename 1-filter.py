@@ -4,16 +4,11 @@ import json
 from tqdm import tqdm
 import numpy as np
 import random
-import os
 
 random.seed(137)
 
 
-# Set up data directories and output directories
-os.makedirs("data/", exist_ok=True)
-os.makedirs("figures/", exist_ok=True)
-
-with open("alldata.json") as fin:
+with open("data/alldata.json") as fin:
     alldata = json.load(fin)
 alldata = alldata["data"]
 
