@@ -4,7 +4,7 @@ library(survminer)
 library(survival)
 
 dat <- read.csv("ptlvl.tsv", sep="\t")
-dat <- dat[which(dat$age > 18),]
+#dat <- dat[which(dat$age > 18),]
 
 dat$eye <- factor(dat$eye)
 dat$gender <- factor(dat$gender)
