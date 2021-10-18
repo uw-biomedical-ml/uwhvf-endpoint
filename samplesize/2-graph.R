@@ -7,7 +7,7 @@ pow80 <- read.csv("simulation.csv")
 pow80$effect.size <- 100.0 * pow80$effect.size
 pow80 <- pow80[which(pow80$effect.size <= 30),]
 pow80$Years <- factor(pow80$length)
-p <- ggplot(pow80, aes(effect.size, sample.size, color=setting, group=setting)) + geom_point() + geom_line() + scale_color_brewer(palette="Set1") + xlab("Effect size as percent reduction in event rate") + ylab("Number of patients needed in each arm") + facet_grid(Years~., scales="free_y") + scale_y_log10(breaks=seq(300, 30000, 500))
+p <- ggplot(pow80, aes(effect.size, sample.size, color=setting, group=setting)) + geom_point() + geom_line() + scale_color_brewer(palette="Set1") + xlab("Effect size as percent reduction in event rate") + ylab("Number of patients needed in each arm") + facet_grid(Years~., scales="free_y") + scale_y_log10(breaks=c(300, 500, 1000, 2000, 5000, 10000, 20000, 40000, 80000, 160000))
 ggsave("pow80.png", p, width=6, height=12)
 
 quit()
