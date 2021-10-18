@@ -6,6 +6,7 @@ require(doMC)
 options(warn=1)
 registerDoMC(cores = 20)
 
+# set seed for reproducibility
 set.seed(137)
 
 dat <- read.csv("data/fields.tsv", sep = "\t", header=T)
@@ -28,22 +29,27 @@ for (yr in seq(1.0, 5.0, 0.5)) {
 
     x = model.matrix(~.,data=trainData)
 
+    # lambda range sequence found by grid search, alpha of 0 also found by grid search 
     cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=0, lambda=10^(seq(5,-5,-0.05)), foldid = foldseq, parallel = T, relax=F, family="cox", type.measure = "C")
     saveRDS(cvfit, file=paste("data/finalmodel-", yr, ".rds", sep=""))
     pdf(paste("figures/glm-", yr,".pdf", sep=""))
     plot(cvfit)
     dev.off()
 
+    # save model coefficients for visualization of field
     params <- coef(cvfit,s=cvfit$lambda.min)
     summ <- summary(params)
     summ <- data.frame(variable = rownames(params)[summ$i], coeff = summ$x)
     write.csv(summ, paste("data/coef-", yr, ".csv", sep=""))
 
+    # Run trained model over training data to get distribution of risks
     outdf <- data.frame(prob = predict(cvfit,newx = x, s=cvfit$lambda.min, type="response"))
     p <- ggplot(outdf, aes(X1)) + geom_histogram(bins=100)
     ggsave(paste("figures/glm-prob-", yr, ".pdf", sep=""), p)
+    # Cutoff determined at the 75th perccentile 
     cutoff <- quantile(outdf$X1)[[4]]
 
+    # Run inference over the heldout test set 
     x_test <- model.matrix(~.,data = testData)
 
     outdf <- data.frame(prob = predict(cvfit,newx = x_test, s=cvfit$lambda.min, type="response"), status = testy$status, time = testy$time)
