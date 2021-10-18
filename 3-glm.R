@@ -13,6 +13,7 @@ dat <- read.csv("fields.tsv", sep = "\t", header=T)
 dat$eye <- factor(dat$eye)
 dat$gender <- factor(dat$gender)
 for (yr in seq(1.0, 5.0, 0.5)) {
+#for (yr in c(1.5)) {
     print(yr)
     sdat <- data.frame(dat)
     sdat$status[sdat$time > yr] <- 0
@@ -29,8 +30,7 @@ for (yr in seq(1.0, 5.0, 0.5)) {
 
     x = model.matrix(~.,data=trainData)
 
-    #cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=0, lambda=10^(seq(20,-20,-0.2)), foldid = foldseq, parallel = T, relax=F, family="cox", type.measure = "C")
-    cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=0, foldid = foldseq, parallel = T, relax=F, family="cox", type.measure = "C")
+    cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=0, lambda=10^(seq(5,-5,-0.05)), foldid = foldseq, parallel = T, relax=F, family="cox", type.measure = "C")
     print(cvfit$cvm)
     saveRDS(cvfit, file=paste("finalmodel-", yr, ".rds", sep=""))
     pdf(paste("glm-", yr,".pdf", sep=""))
