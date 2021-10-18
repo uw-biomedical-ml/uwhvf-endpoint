@@ -16,6 +16,12 @@ p <- ggplot(pow80, aes(effect.size, sample.size, color=setting, group=setting)) 
     facet_wrap(Years~., scales="free_y") 
 ggsave("pow80.png", p, width=12, height=6)
 
+
+effect20 <- pow80[which(pow80$effect.size == 20),]
+p <- ggplot(effect20, aes(Years, sample.size, color=setting, group=setting)) + geom_point() + geom_line() +
+    scale_color_brewer(palette="Set1")
+ggsave("effect20.png", p, width=7, height=7)
+
 quit()
 
 p <- ggplot(sdat, aes(hazard.ratio, power, color=log(simn))) + geom_point() + facet_grid(sample.size ~ length)
