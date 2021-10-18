@@ -3,7 +3,7 @@
 library(survminer)
 library(survival)
 
-dat <- read.csv("ptlvl.tsv", sep="\t")
+dat <- read.csv("data/ptlvl.tsv", sep="\t")
 #dat <- dat[which(dat$age > 18),]
 
 dat$eye <- factor(dat$eye)
@@ -38,7 +38,7 @@ dat$yearcat <- factor(dat$yearcat, levels=c("< 2005", "2005 - 2010", "2010 - 201
 
 summary(dat)
 
-pdf("full.pdf")
+pdf("figures/km-full.pdf")
 fit <- survfit(Surv(time, event) ~ 1, data = dat)
 ggsurvplot(
   fit, 
@@ -59,7 +59,7 @@ dev.off()
 
 dat$Age <- dat$agecat
 
-pdf("agecat.pdf")
+pdf("figures/km-agecat.pdf")
 fit <- survfit(Surv(time, event) ~ Age, data = dat)
 ggsurvplot(
   fit, 
@@ -79,7 +79,7 @@ dev.off()
 
 dat$MD <- dat$startmdcat
 
-pdf("mdcat.pdf")
+pdf("figures/km-mdcat.pdf")
 fit <- survfit(Surv(time, event) ~ MD, data = dat)
 ggsurvplot(
   fit, 
@@ -99,7 +99,7 @@ dev.off()
 
 
 
-pdf("facet.pdf")
+pdf("figures/km-facet-age.pdf")
 fit <- survfit(Surv(time, event) ~ MD, data = dat)
 ggsurvplot_facet(
   fit, 
@@ -117,7 +117,7 @@ dev.off()
 
 dat$Year <- dat$yearcat
 
-pdf("facet-year.pdf")
+pdf("figures/km-facet-year.pdf")
 fit <- survfit(Surv(time, event) ~ Year, data = dat)
 ggsurvplot_facet(
   fit, 

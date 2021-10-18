@@ -4,26 +4,36 @@ import json
 from tqdm import tqdm
 import numpy as np
 import random
+import os
 
 random.seed(137)
+
+
+# Set up data directories and output directories
+os.makedirs("data/", exist_ok=True)
+os.makedirs("figures/", exist_ok=True)
 
 with open("alldata.json") as fin:
     alldata = json.load(fin)
 alldata = alldata["data"]
 
-found = [0,0]
 ptgrps = {}
 
-with open("fields.tsv", "w") as fout2:
+# generate output for point-wise field data
+with open("data/fields.tsv", "w") as fout2:
     header = []
     for i in range(1,55):
         header.append(f"p{i}")
     header += ["age", "eye", "gender", "status", "grp", "foldid", "time", "startmd"]
     fout2.write("%s\n" % "\t".join(header))
-    with open("ptlvl.tsv", "w") as fout:
+
+    # generate output for patient - eye level data
+    with open("data/ptlvl.tsv", "w") as fout:
         fout.write("ptid\teye\tgender\tyear\tstartmd\tage\tevent\ttime\tgrp\n")
         for ptid in tqdm(alldata.keys()):
             ld = None
+
+            # Patient level partitioning
             grp = "train"
             if random.random() < 0.5:
                 grp = "test"
@@ -31,6 +41,7 @@ with open("fields.tsv", "w") as fout2:
             seq = {}
             gender = alldata[ptid]["gender"]
             year = alldata[ptid]["year"]
+
             for eye in ("R", "L"):
                 if not eye in alldata[ptid]:
                     continue
@@ -44,10 +55,13 @@ with open("fields.tsv", "w") as fout2:
                         startmd = np.mean(dat["td_seq"])
                         seq[0.0] = dat["td_seq"]
                         last = age
+
+                    # Stop following if the gap between HVFs is more than 2.25 years
                     if age - last > 2.25:
                         break
                     seq[age - firstage] = np.array(dat["td_seq"])
                     last = age
+
                 event = 0
                 ld = seq[0.0]
                 last = np.zeros(ld.shape, dtype=np.uint8)
@@ -66,10 +80,11 @@ with open("fields.tsv", "w") as fout2:
                     time = d
                 if time == 0:
                     continue
-                if time >= 5.0:
-                    found[event] += 1
+
                 out = (ptid, eye, gender, year, startmd, firstage, event, time, grp)
                 fout.write("%s\n" % "\t".join(map(str,out)))
+
+                # Dummy code categorical variables
                 eyebin = 0
                 if eye == "L":
                     eyebin = 1
@@ -80,4 +95,3 @@ with open("fields.tsv", "w") as fout2:
                     genderbin = 1
 
                 fout2.write("%s\t%f\t%d\t%d\t%d\t%s\t%d\t%f\t%f\n" % ("\t".join(map(str, ld)), firstage, eyebin, genderbin, event, grp,foldid, time, startmd))
-    print(found)

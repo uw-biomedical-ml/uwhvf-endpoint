@@ -9,7 +9,7 @@ registerDoMC(cores = 20)
 
 set.seed(137)
 
-dat <- read.csv("fields.tsv", sep = "\t", header=T)
+dat <- read.csv("data/fields.tsv", sep = "\t", header=T)
 dat$eye <- factor(dat$eye)
 dat$gender <- factor(dat$gender)
 for (yr in seq(1.0, 5.0, 0.5)) {
@@ -30,19 +30,19 @@ for (yr in seq(1.0, 5.0, 0.5)) {
     x = model.matrix(~.,data=trainData)
 
     cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=0, lambda=10^(seq(5,-5,-0.05)), foldid = foldseq, parallel = T, relax=F, family="cox", type.measure = "C")
-    saveRDS(cvfit, file=paste("finalmodel-", yr, ".rds", sep=""))
-    pdf(paste("glm-", yr,".pdf", sep=""))
+    saveRDS(cvfit, file=paste("data/finalmodel-", yr, ".rds", sep=""))
+    pdf(paste("figures/glm-", yr,".pdf", sep=""))
     plot(cvfit)
     dev.off()
 
     params <- coef(cvfit,s=cvfit$lambda.min)
     summ <- summary(params)
     summ <- data.frame(variable = rownames(params)[summ$i], coeff = summ$x)
-    write.csv(summ, paste("coef-", yr, ".csv", sep=""))
+    write.csv(summ, paste("data/coef-", yr, ".csv", sep=""))
 
     outdf <- data.frame(prob = predict(cvfit,newx = x, s=cvfit$lambda.min, type="response"))
     p <- ggplot(outdf, aes(X1)) + geom_histogram(bins=100)
-    ggsave(paste("glm-prob-", yr, ".pdf", sep=""), p)
+    ggsave(paste("figures/glm-prob-", yr, ".pdf", sep=""), p)
     cutoff <- quantile(outdf$X1)[[4]]
 
     x_test <- model.matrix(~.,data = testData)
@@ -51,5 +51,5 @@ for (yr in seq(1.0, 5.0, 0.5)) {
     outdf$cutoff <- cutoff
     outdf$include <- 0
     outdf$include[outdf$X1 >= cutoff] <- 1
-    write.csv(outdf, paste("samplesize/model-", yr,".csv", sep=""), row.names=F)
+    write.csv(outdf, paste("data/model-", yr,".csv", sep=""), row.names=F)
 }
