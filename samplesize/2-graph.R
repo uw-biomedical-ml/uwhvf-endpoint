@@ -19,7 +19,7 @@ ggsave("pow80.png", p, width=12, height=6)
 
 effect20 <- pow80[which(pow80$effect.size == 20),]
 p <- ggplot(effect20, aes(Years, sample.size, color=setting, group=setting)) + geom_point() + geom_line() +
-    scale_color_brewer(palette="Set1")
+    scale_color_brewer(palette="Set1") + ylim(0,10000)
 ggsave("effect20.png", p, width=7, height=7)
 
 quit()
