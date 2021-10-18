@@ -1,6 +1,5 @@
 #!/usr/bin/env Rscript
 library(glmnet)
-library(PRROC)
 library(ggplot2)
 require(doMC)
 
