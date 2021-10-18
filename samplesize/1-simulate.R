@@ -7,15 +7,32 @@ dat <- read.csv("../ptlvl.tsv", sep="\t")
 dat <- dat[which(dat$grp == "test"),]
 
 allres <- NULL
-for (setting in c("base", "subgroup")) {
+times <- seq(1,5,0.5)
+
+for (setting in c("model", "base", "subgroup")) {
     if (setting == "base") {
         sdat <- data.frame(dat)
     } else if (setting == "subgroup") {
         sdat <- dat[which(dat$age >= 60 & dat$age < 80 & dat$startmd <= -5.0),]
     }
 
-    mod <- survfit(Surv(time, event) ~ 1, data=sdat)
-    eventrates <- summary(mod, times = c(1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5))
+    if (setting == "model") {
+        eventrates <- data.frame(time = times)
+        eventrates$surv <- NULL
+        for (yr in times) {
+            moddat <- read.csv(paste("model-", yr, ".csv", sep=""))
+            moddat <- moddat[which(moddat$include == 1),]
+            mod <- survfit(Surv(time, status) ~ 1, data=moddat)
+            out <- summary(mod, times = yr)
+            eventrates$surv[eventrates$time == yr] <- out$surv[1]
+        }
+    } else {
+        mod <- survfit(Surv(time, event) ~ 1, data=sdat)
+        eventrates <- summary(mod, times = times)
+    }
+    print(setting)
+    print(eventrates)
+
 
     for (i in seq(length(eventrates$time))) {
         yr <- eventrates$time[i]

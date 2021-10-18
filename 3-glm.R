@@ -4,6 +4,7 @@ library(PRROC)
 library(ggplot2)
 require(doMC)
 
+options(warn=1)
 registerDoMC(cores = 20)
 
 set.seed(137)
@@ -28,8 +29,28 @@ for (yr in seq(1.0, 5.0, 0.5)) {
 
     x = model.matrix(~.,data=trainData)
 
-    cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=0, foldid = foldseq, parallel = T, relax=T, family="cox", type.measure = "C")
+    #cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=0, lambda=10^(seq(20,-20,-0.2)), foldid = foldseq, parallel = T, relax=F, family="cox", type.measure = "C")
+    cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=0, foldid = foldseq, parallel = T, relax=F, family="cox", type.measure = "C")
+    print(cvfit$cvm)
     saveRDS(cvfit, file=paste("finalmodel-", yr, ".rds", sep=""))
+    pdf(paste("glm-", yr,".pdf", sep=""))
+    plot(cvfit)
+    dev.off()
+    outdf <- data.frame(prob = predict(cvfit,newx = x, s=cvfit$lambda.min, type="response"))
+    print(head(outdf))
+    p <- ggplot(outdf, aes(X1)) + geom_histogram(bins=100)
+    ggsave(paste("glm-prob-", yr, ".pdf", sep=""), p)
+    print(quantile(outdf$X1))
+    print(summary(outdf$X1))
+    cutoff <- quantile(outdf$X1)[[4]]
+
+    x_test <- model.matrix(~.,data = testData)
+
+    outdf <- data.frame(prob = predict(cvfit,newx = x_test, s=cvfit$lambda.min, type="response"), status = testy$status, time = testy$time)
+    outdf$cutoff <- cutoff
+    outdf$include <- 0
+    outdf$include[outdf$X1 >= cutoff] <- 1
+    write.csv(outdf, paste("samplesize/model-", yr,".csv", sep=""), row.names=F)
 }
 quit()
 
