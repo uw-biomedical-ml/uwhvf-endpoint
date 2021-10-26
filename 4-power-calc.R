@@ -40,8 +40,8 @@ for (setting in c("model", "base", "subgroup")) {
         prob <- 1 - eventrates$surv[i]
         for (effectsize in seq(0.10, 0.50, 0.10)) {
             prob2 <- (1 - effectsize) * prob
-            h <- 2*asin(sqrt(prob)) - 2*asin(sqrt(prob2)) 
-            pwr <- pwr.2p.test(h = h, sig.level=0.05, power=0.8)
+            #h <- 2*asin(sqrt(prob)) - 2*asin(sqrt(prob2)) 
+            pwr <- pwr.2p.test(h = ES.h(prob, prob2), sig.level=0.05, power=0.8)
             allres <- rbind(allres, data.frame(setting=setting, length=yr, control.event = prob, drug.event = prob2, sample.size = pwr$n, effect.size=effectsize))
         }
     }
@@ -51,6 +51,7 @@ write.csv(allres, "data/simulation.csv", row.names=F)
 pow80 <- allres
 pow80$setting <- factor(pow80$setting, levels=c("base", "subgroup", "model"), labels=c("No selection", "Traditional Subgroup", "AI Model"))
 pow80$effect.size <- 100.0 * pow80$effect.size
+pow80$effect.size <- factor(pow80$effect.size)
 pow80$Years <- factor(pow80$length)
 
 effect20 <- pow80[which(pow80$effect.size == 20 | pow80$effect.size == 10 | pow80$effect.size == 30 | pow80$effect.size == 50),]
@@ -60,14 +61,6 @@ p <- ggplot(effect20, aes(Years, sample.size, color=setting, group=setting)) + g
     ylab("Number of patients needed in each arm") + theme(legend.title = element_blank())
 ggsave("figures/effect20.pdf", p, width=12, height=6)
 
-pow80 <- pow80[which(pow80$effect.size <= 30),]
-p <- ggplot(pow80, aes(effect.size, sample.size, color=setting, group=setting)) + geom_point() + geom_line() + 
-    scale_color_brewer(palette="Set1") + xlab("Effect size as percent reduction in event rate") + 
-    ylab("Number of patients needed in each arm") + 
-    scale_y_log10(breaks=c(300, 500, 1000, 2000, 5000, 10000, 20000, 40000, 80000, 160000)) + 
-    theme(legend.title = element_blank()) +
-    facet_wrap(Years~., scales="free_y") 
-ggsave("figures/pow80.pdf", p, width=12, height=6)
 
 
 
