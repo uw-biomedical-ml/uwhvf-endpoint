@@ -24,13 +24,34 @@ for (yr in seq(1.0, 5.0, 0.5)) {
     trainy = subset(trainData, select=c(status, time))
     testy = subset(testData, select=c(status, time))
 
-    trainData <- subset(trainData, select = -c(status,grp,foldid,time) )
-    testData <- subset(testData, select = -c(status,grp,foldid,time) )
+    trainData <- subset(trainData, select = -c(status,grp,foldid,time,startmd) )
+    testData <- subset(testData, select = -c(status,grp,foldid,time,startmd) )
 
     x = model.matrix(~.,data=trainData)
 
     # lambda range sequence found by grid search, alpha of 0 also found by grid search 
-    cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=0, lambda=10^(seq(5,-5,-0.05)), foldid = foldseq, parallel = T, relax=F, family="cox", type.measure = "C")
+    df = NULL
+    for (alpha in seq(0,1,length=100)^4) {
+        error <- NULL
+        for (rep in seq(0,1)) {
+            cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=alpha, lambda=10^(seq(5,-5,-0.05)), foldid = foldseq, parallel = T, relax=T, family="cox", type.measure = "C")
+            error <- c(error, cvfit$cvm)
+        }
+        print(error)
+        print(c(alpha, mean(error)))
+        error <- mean(error)
+        df <- rbind(df, data.frame(alpha=alpha, error=error))
+        print(c(alpha,error))
+    }
+    print(df)
+    p <- ggplot(df, aes(alpha, error)) + geom_line() + geom_point()
+    ggsave(paste("figures/glmnet.alpha-",yr,".pdf", sep=""), p)
+    df <- df[order(-df$error),]
+    finalalpha <- df[1,]$alpha
+
+    print(finalalpha)
+
+    cvfit = cv.glmnet(x, y=as.matrix(trainy), alpha=finalalpha, lambda=10^(seq(5,-5,-0.05)), foldid = foldseq, parallel = T, relax=T, family="cox", type.measure = "C")
     saveRDS(cvfit, file=paste("data/finalmodel-", yr, ".rds", sep=""))
     pdf(paste("figures/glm-", yr,".pdf", sep=""))
     plot(cvfit)

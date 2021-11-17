@@ -58,7 +58,7 @@ effect20 <- pow80[which(pow80$effect.size == 20 | pow80$effect.size == 10 | pow8
 effect20$effect.size <- factor(effect20$effect.size, levels=c(10, 20, 30, 50), labels=c("Effect size: 10%", "Effect size: 20%", "Effect size: 30%", "Effect size: 50%"))
 p <- ggplot(effect20, aes(Years, sample.size, color=setting, group=setting)) + geom_point() + geom_line() +
     scale_color_brewer(palette="Set1") + facet_wrap(~effect.size ) + xlab("Length of clinical trial (years)") + coord_cartesian(ylim=c(0,10000)) +
-    ylab("Number of patients needed in each arm") + theme(legend.title = element_blank())
+        ylab("Number of patients needed in each arm") + theme(legend.title = element_blank())
 ggsave("figures/effect20.pdf", p, width=12, height=6)
 
 
